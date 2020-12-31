@@ -22,8 +22,17 @@ This application provides
 The only way to truly understand how magical Streamlit is to play around with it.
 But if you need to be convinced first, then here is the **4 minute introduction** to Streamlit!
 Afterwards you can explore examples in the Gallery and go to the [Streamlit docs](https://streamlit.io/docs/) to get started.
+
+Đánh giá chất lượng rượu vang bằng **học máy** giúp con người nhận định chính xác về chất lượng sản phẩm làm ra, từ đó hạn chế những rủi ro trong sản xuất và tăng cao hiệu suất.
+Web app này hỗ trợ
+- Phân tích dữ liệu
+- Tiền xử lý dữ liệu bằng PCA và Normalization
+- Đánh giá chất lượng từ tập dữ liệu rượu vang do người dùng nhập vào
+
+## Tầm quan trọng
+Trong vài thập kỷ qua, ngành công nghiệp rượu vang phát triển với nhiều chủng loại đa dạng. Trên thực tế, văn hóa rượu vang nói chung đang bùng nổ mạnh mẽ
     """
         )
         ast.shared.components.video_youtube(
-            src="https://www.youtube.com/embed/B2iAodr0fOo"
+            src="https://www.youtube.com/watch?v=j6VgWHxqaLU&feature=emb_title"
         )
