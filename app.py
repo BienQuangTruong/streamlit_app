@@ -33,7 +33,7 @@ def main():
     st.sidebar.title("Intro")
     st.sidebar.info(
         "App này được làm ra nhằm mục đích phục vụ cho việc **nghiên cứu và học tập** "
-        "[source code](https://github.com/). "
+        "[source code](https://github.com/BienQuangTruong/streamlit_app). "
     )
     st.sidebar.title("About")
     st.sidebar.info(
