@@ -29,6 +29,3 @@ def write():
         data = load_data()
         data_load_state.text("Done! (using st.cache)")
         raw_data(data)
-    else:
-        st.text('No File')
-

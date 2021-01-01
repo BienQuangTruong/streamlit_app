@@ -96,7 +96,3 @@ def write():
 
         #plt.show()
         st.pyplot(fig)
-    else:
-        st.text('NO FILE')
-
-    

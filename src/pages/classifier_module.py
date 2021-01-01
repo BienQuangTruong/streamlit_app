@@ -38,8 +38,6 @@ def write():
             return X, y
 
         X, y = get_dataset(dataset_name)
-        print(X)
-        print(y)
         st.write("Shape of dataset", X.shape)
         st.write("number of classes", len(np.unique(y)))
 

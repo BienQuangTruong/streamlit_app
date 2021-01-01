@@ -9,12 +9,13 @@ import src.pages.vision
 import src.pages.xuLyData
 import src.pages.regressor_module
 import src.pages.classifier_module
+import src.pages.tienXuLyData
 
 # ast.core.services.other.set_logging_format()
 
 PAGES = {
     "Phân tích dữ liệu": src.pages.xuLyData,
-    "Tiền xử lý": src.pages.home,
+    "Tiền xử lý": src.pages.tienXuLyData,
     "Mô hình": src.pages.about,
     "Hồi quy (Regression)": src.pages.regressor_module,
     "Phân lớp (Classifier)": src.pages.classifier_module
