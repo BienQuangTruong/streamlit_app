@@ -10,13 +10,15 @@ import src.pages.xuLyData
 import src.pages.regressor_module
 import src.pages.classifier_module
 import src.pages.tienXuLyData
+import src.pages.modelPage
 
 # ast.core.services.other.set_logging_format()
 
 PAGES = {
+    "Home": src.pages.home,
     "Phân tích dữ liệu": src.pages.xuLyData,
     "Tiền xử lý": src.pages.tienXuLyData,
-    "Mô hình": src.pages.about,
+    "Mô hình": src.pages.modelPage,
     "Hồi quy (Regression)": src.pages.regressor_module,
     "Phân lớp (Classifier)": src.pages.classifier_module
 }
@@ -33,12 +35,12 @@ def main():
     st.sidebar.title("Intro")
     st.sidebar.info(
         "App này được làm ra nhằm mục đích phục vụ cho việc **nghiên cứu và học tập** "
-        "[source code](https://github.com/). "
+        "[source code](https://github.com/BienQuangTruong/streamlit_app). "
     )
     st.sidebar.title("About")
     st.sidebar.info(
         """
-        App này được thực hiện bởi [].
+        App này được thực hiện bởi Biện Quang Trường - Nguyễn Văn Phước.
 """
     )
 
