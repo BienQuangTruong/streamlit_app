@@ -11,8 +11,12 @@ def write():
         ast.shared.components.title_awesome("")
         st.write(
             """
-# Mô hình
-<blockquote class="imgur-embed-pub" lang="en" data-id="VZmmxC8"><a href="https://imgur.com/VZmmxC8">View post on imgur.com</a></blockquote><script async src="//s.imgur.com/min/embed.js" charset="utf-8"></script>
+<h1 style="color: red">Mô hình</h1>
+Trong quá trình xây dựng mô hình, mục đích
+của tiền xử lý dữ liệu là để loại bỏ các dữ liệu gây nhiễu. Sau đó, các mẫu phải được phân
+nhóm thành bộ hiệu chuẩn và xác nhận dựa trên tiêu chí đã được trình bày trong cả hai bộ.
+<br/><br/>
+<img src="https://i.imgur.com/VZmmxC8.png" style="max-width: 700px">
     """,
         unsafe_allow_html=True,
         )
