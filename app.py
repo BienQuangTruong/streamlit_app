@@ -14,6 +14,7 @@ import src.pages.tienXuLyData
 # ast.core.services.other.set_logging_format()
 
 PAGES = {
+    "Home": src.pages.home,
     "Phân tích dữ liệu": src.pages.xuLyData,
     "Tiền xử lý": src.pages.tienXuLyData,
     "Mô hình": src.pages.about,

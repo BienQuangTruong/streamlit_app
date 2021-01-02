@@ -11,8 +11,9 @@ def write():
         ast.shared.components.title_awesome("")
         st.write(
             """
+# Giới thiệu chung
 Đánh giá chất lượng rượu vang bằng **học máy** giúp con người nhận định chính xác về chất lượng sản phẩm làm ra, từ đó hạn chế những rủi ro trong sản xuất và tăng cao hiệu suất.
-Web app này hỗ trợ
+Web app này hỗ trợ  
 - Phân tích dữ liệu
 - Tiền xử lý dữ liệu bằng PCA và Normalization
 - Đánh giá chất lượng từ tập dữ liệu rượu vang do người dùng nhập vào
@@ -22,5 +23,6 @@ Trong vài thập kỷ qua, ngành công nghiệp rượu vang phát triển v�
     """
         )
         ast.shared.components.video_youtube(
-            src="https://www.youtube.com/watch?v=j6VgWHxqaLU&feature=emb_title"
+            src="https://www.youtube.com/embed/j6VgWHxqaLU"
+            # https://www.youtube.com/embed/B2iAodr0fOo
         )
