@@ -11,6 +11,7 @@ import src.pages.regressor_module
 import src.pages.classifier_module
 import src.pages.tienXuLyData
 import src.pages.modelPage
+import src.pages.predict
 
 # ast.core.services.other.set_logging_format()
 
@@ -20,7 +21,8 @@ PAGES = {
     "Tiền xử lý": src.pages.tienXuLyData,
     "Mô hình": src.pages.modelPage,
     "Hồi quy (Regression)": src.pages.regressor_module,
-    "Phân lớp (Classifier)": src.pages.classifier_module
+    "Phân lớp (Classifier)": src.pages.classifier_module,
+    "Dự đoán": src.pages.predict
 }
 
 def main():

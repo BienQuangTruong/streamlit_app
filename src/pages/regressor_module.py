@@ -13,22 +13,35 @@ from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.cross_decomposition import PLSRegression
 import os
 from io import StringIO
+from sklearn.preprocessing import StandardScaler
+from scipy import stats
+from sklearn import neighbors
+import pickle
 
 def write():
 
     st.title(" THUẬT TOÁN HỒI QUY (REGRESSION) ")
 
     ###########################################
-    regressor_name = st.sidebar.selectbox("Select Regressor", ("PLS", "SVR", "MLP Regressor"))
+    regressor_name = st.sidebar.selectbox("Select Regressor", ("PLS", "SVR", "MLP Regressor", "KNN"))
     uploaded_file = st.file_uploader("Chọn tập dữ liệu CSV từ máy của bạn")
 
     if uploaded_file is not None:
         # Can be used wherever a "file-like" object is accepted:
         # uploaded_file.seek(0)
         dataframe = pd.read_csv(uploaded_file, low_memory=False)
-        st.write(dataframe)
-        y = dataframe['quality'].values
-        X = dataframe.values[:, 0:-1]
+        z = np.abs(stats.zscore(dataframe))
+
+        data = dataframe[(z < 3).all(axis=1)]
+        data['tasty'] = [0 if x < 6 else 1 for x in data['quality']]
+
+        df = data[["fixed acidity","volatile acidity","citric acid","residual sugar","chlorides","free sulfur dioxide","total sulfur dioxide","density","pH","sulphates","alcohol","tasty","quality"]]
+
+        st.write(df)
+
+        # st.write(dataframe)
+        y = df['quality'].values
+        X = df.values[:, 0:-1]
         dataset_name = {'data': (X), 'target': (y)}
 
         def get_dataset(dataset_name):
@@ -41,17 +54,6 @@ def write():
         st.write("Shape of dataset", X.shape)
         st.write("number of classes", len(np.unique(y)))
 
-        # def add_parameter_ui_reg(reg_name):
-        #     params = dict()
-        #     if reg_name == 'MLP_Regressor':
-        #         M = st.sidebar.slider('M', 1, 100)
-        #         params['M'] = M
-        #     elif reg_name == 'SVR':
-        #         C = st.sidebar.slider('C', 0.01, 10.0)
-        #         params['C'] = C
-        #     return params
-        # params_regression = add_parameter_ui_reg(regressor_name)
-
         # Set up regression
         def get_regression(reg_name):
             reg = None
@@ -59,6 +61,8 @@ def write():
                 reg = MLPRegressor()
             elif reg_name == 'PLS':
                 reg = PLSRegression()
+            elif reg_name == 'KNN':
+                reg = neighbors.KNeighborsRegressor()
             else:
                 reg = SVR()
             return reg
@@ -67,10 +71,26 @@ def write():
 
         #### REGRESSION ####
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
+        x_train, x_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1)
 
-        reg.fit(X_train, y_train)
-        y_pred_regressor = reg.predict(X_test)
+        print(x_test)
+        # Normalize
+        sc = StandardScaler()
+        x_train = sc.fit_transform(x_train)
+        x_test = sc.transform(x_test)
+        print(x_test)
+        reg.fit(x_train, y_train)
+
+        # save the model to disk
+        filename = 'svr_model.pkl'
+        pickle.dump(reg, open(filename, 'wb'))
+
+        # x_tests = x_test[:, :-1]
+
+        dfs = pd.DataFrame(x_test)
+        dfs.to_csv('test.csv', index = False)
+
+        y_pred_regressor = reg.predict(x_test)
 
         r2 = r2_score(y_test, y_pred_regressor)
         mse = mean_squared_error(y_test, y_pred_regressor)
@@ -78,6 +98,11 @@ def write():
         st.write(f'Regressior = {regressor_name}')
         st.write(f'R2 =', r2)
         st.write(f'MSE =', mse)
+
+        # from sklearn.model_selection import cross_val_score
+        # accuracies = cross_val_score(estimator = reg, X = x_train, y = y_train, cv = 20)
+        # st.write("Accuracy: {:.2f} %".format(accuracies.mean()*100))
+        # st.write("Accuracy: {:.2f} %".format(accuracies.std()*100))
 
         #### PLOT DATASET ####
         # Project the data onto the 2 primary principal components
