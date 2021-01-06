@@ -13,6 +13,9 @@ from sklearn.neural_network import MLPClassifier, MLPRegressor
 from sklearn.cross_decomposition import PLSRegression
 import os
 from io import StringIO
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from scipy import stats
+import pickle
 
 def write():
 
@@ -25,10 +28,27 @@ def write():
     if uploaded_file is not None:
         # Can be used wherever a "file-like" object is accepted:
         # uploaded_file.seek(0)
-        dataframe = pd.read_csv(uploaded_file, low_memory=False)
-        st.write(dataframe)
-        y = dataframe['quality'].values
-        X = dataframe.values[:, 0:-1]
+        wine = pd.read_csv(uploaded_file, low_memory=False)
+    
+        #z-core
+        z = np.abs(stats.zscore(wine))
+
+        wine = wine[(z < 3).all(axis=1)]
+        # Thực hiện phân loại nhị phân cho biến phản hồi.
+        # Phân chia rượu ngon và dở bằng cách đưa ra giới hạn chất lượng
+        bins = (2, 6, 8)
+        group_names = ['bad', 'good']
+        wine['quality'] = pd.cut(wine['quality'], bins = bins, labels = group_names)
+
+        # Bây giờ, hãy gán nhãn cho biến chất lượng của chúng tôi
+        label_quality = LabelEncoder()
+
+        #Bad becomes 0 and good becomes 1 
+        wine['quality'] = label_quality.fit_transform(wine['quality'])
+        st.write(wine)
+
+        y = wine['quality'].values
+        X = wine.values[:, 0:-1]
         dataset_name = {'data': (X), 'target': (y)}
             
         def get_dataset(dataset_name):
@@ -41,26 +61,11 @@ def write():
         st.write("Shape of dataset", X.shape)
         st.write("number of classes", len(np.unique(y)))
 
-        # def add_parameter_ui(clf_name):
-        #     params = dict()
-        #     if clf_name == 'SVM':
-        #         C = st.sidebar.slider('C', 0.01, 10.0)
-        #         params['C'] = C
-        #     elif  clf_name == 'MLP_Classifier':
-        #         M = st.sidebar.slider('M', 1, 100)
-        #         params['M'] = M
-        #     else:
-        #         K = st.sidebar.slider('K', 1, 15)
-        #         params['K'] = K
-        #     return params
-
-        # params = add_parameter_ui(classifier_name)
-
         # Set up classifier
         def get_classifier(clf_name):
             clf = None
             if clf_name == 'SVM':
-                clf = SVC()
+                clf = SVC(C = 1.2, gamma =  0.9, kernel= 'rbf')
             elif clf_name == 'MLP Classifier':
                 clf = MLPClassifier()
             else:
@@ -71,7 +76,13 @@ def write():
 
         #### CLASSIFICATION ####
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=1234)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+        #Normalize
+        sc = StandardScaler()
+
+        X_train = sc.fit_transform(X_train)
+        X_test = sc.fit_transform(X_test)
 
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
@@ -80,6 +91,11 @@ def write():
 
         st.write(f'Classifier = {classifier_name}')
         st.write(f'Accuracy =', acc)
+
+        # save the model to disk
+        filename = 'classifier_models.pkl'
+        pickle.dump(clf, open(filename, 'wb'))
+
 
         #### PLOT DATASET ####
         # Project the data onto the 2 primary principal components
