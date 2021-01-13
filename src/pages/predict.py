@@ -5,7 +5,7 @@ import streamlit as st
 import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 
 def write():
 
@@ -35,20 +35,7 @@ def write():
 
         pred_clf = clf.predict(x_test)
 
-        df['tasty'] = pred_clf
-
-        # st.write("Sau khi classifier: ",df)
-
-        # Normalize
-        sc1 = StandardScaler()
-        reg_test = sc1.fit_transform(df)
-
-        #load model
-        reg = pickle.load(open('svr_model.pkl', 'rb'))
-
-        y_pred_regressor = reg.predict(reg_test)
-
-        df['quality'] = y_pred_regressor
+        df['quality'] = pred_clf
 
         st.write('Đã dự đoán xong !!!', df)
 

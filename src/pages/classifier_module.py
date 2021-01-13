@@ -3,18 +3,18 @@ from sklearn import datasets
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.decomposition import PCA
 from sklearn.svm import SVC, SVR
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, r2_score, mean_squared_error
-from sklearn.neural_network import MLPClassifier, MLPRegressor
-from sklearn.cross_decomposition import PLSRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.neural_network import MLPClassifier
 import os
 from io import StringIO
-from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.preprocessing import StandardScaler, LabelEncoder, MinMaxScaler
 from scipy import stats
+from sklearn.model_selection import StratifiedKFold
 import pickle
 
 def write():
@@ -23,7 +23,7 @@ def write():
 
     ###########################################
     uploaded_file = st.file_uploader("Chọn tập dữ liệu CSV từ máy của bạn")
-    classifier_name = st.sidebar.selectbox("Select Classifier", ("KNN", "MLP Classifier", "SVM"))
+    classifier_name = st.sidebar.selectbox("Select Classifier", ("KNN", "MLP Classifier", "SVM", "RandomForest"))
 
     if uploaded_file is not None:
         # Can be used wherever a "file-like" object is accepted:
@@ -34,43 +34,65 @@ def write():
         z = np.abs(stats.zscore(wine))
 
         wine = wine[(z < 3).all(axis=1)]
-        # Thực hiện phân loại nhị phân cho biến phản hồi.
-        # Phân chia rượu ngon và dở bằng cách đưa ra giới hạn chất lượng
-        bins = (2, 6, 8)
-        group_names = ['bad', 'good']
-        wine['quality'] = pd.cut(wine['quality'], bins = bins, labels = group_names)
-
-        # Bây giờ, hãy gán nhãn cho biến chất lượng của chúng tôi
-        label_quality = LabelEncoder()
-
-        #Bad becomes 0 and good becomes 1 
-        wine['quality'] = label_quality.fit_transform(wine['quality'])
+        # wine['quality'] = [0 if x < 6 else 1 for x in wine['quality']]
+        wine['quality'] = [0 if x < 5 else 2 if x > 6 else 1 for x in wine['quality']]
+        
         st.write(wine)
 
-        y = wine['quality'].values
-        X = wine.values[:, 0:-1]
-        dataset_name = {'data': (X), 'target': (y)}
+        # y = wine['quality'].values
+        # X = wine.values[:, 0:-1]
+
+        X = wine.drop(['quality'], axis = 1)
+        y = wine['quality']
+        print(y)
+
+        #Normalize
+        X = StandardScaler().fit_transform(X)
+        # dataset_name = {'data': (X), 'target': (y)}
             
-        def get_dataset(dataset_name):
-            data = dataset_name
-            X = data['data']
-            y = data['target']
-            return X, y
+        # def get_dataset(dataset_name):
+        #     data = dataset_name
+        #     X = data['data']
+        #     y = data['target']
+        #     return X, y
 
-        X, y = get_dataset(dataset_name)
+        # X, y = get_dataset(dataset_name)
         st.write("Shape of dataset", X.shape)
-        st.write("number of classes", len(np.unique(y)))
-
+        # strtifiedKFold
+        skf = StratifiedKFold(n_splits=5)
         # Set up classifier
         def get_classifier(clf_name):
-            clf = None
             if clf_name == 'SVM':
-                clf = SVC(C = 1.2, gamma =  0.9, kernel= 'rbf')
+                svc = SVC()
+                grid_params = {'C': [0.1, 0.3, 1, 3, 10], 'gamma': [0.1, 0.3, 1, 3, 10], 'kernel': ['rbf', 'sigmoid']}
+                svm_gs = GridSearchCV(estimator=svc, param_grid=grid_params, scoring='accuracy', cv=skf)
+                return svm_gs
             elif clf_name == 'MLP Classifier':
-                clf = MLPClassifier()
+                mlp = MLPClassifier()
+                grid_params = {
+                    'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)],
+                    'activation': ['tanh', 'relu'],
+                    'solver': ['sgd', 'adam'],
+                    'alpha': [0.0001, 0.05],
+                    'learning_rate': ['constant','adaptive'],
+                }
+                # from sklearn.model_selection import GridSearchCV
+                mlp_gs = GridSearchCV(mlp, param_grid=grid_params, n_jobs=-1, cv=skf)
+                return mlp_gs
+            elif clf_name == 'RandomForest':
+                rfc = RandomForestClassifier(oob_score=True)
+                grid_params = {"n_estimators": [50, 100, 150, 200, 250],
+                                'min_samples_leaf': [1, 2, 4]}
+                rfc_gs = GridSearchCV(rfc, param_grid=grid_params, scoring='accuracy', cv=skf)
+                return rfc_gs
             else:
-                clf = KNeighborsClassifier()
-            return clf
+                knn = KNeighborsClassifier()
+                grid_params = { 'n_neighbors' : [5,7,9,11,13,15],
+                                'weights' : ['uniform','distance'],
+                                'metric' : ['minkowski','euclidean','manhattan']}
+                knn_gs = GridSearchCV(knn, param_grid=grid_params, scoring='accuracy', cv=skf)
+                return knn_gs
+            return
 
         clf = get_classifier(classifier_name)
 
@@ -79,26 +101,32 @@ def write():
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
         #Normalize
-        sc = StandardScaler()
+        # sc = StandardScaler()
 
-        X_train = sc.fit_transform(X_train)
-        X_test = sc.fit_transform(X_test)
+        # X_train = sc.fit_transform(X_train)
+        # X_test = sc.fit_transform(X_test)
 
         clf.fit(X_train, y_train)
         y_pred = clf.predict(X_test)
 
         acc = accuracy_score(y_test, y_pred)
 
+        report = classification_report(y_test,y_pred, output_dict=True)
+
+        df_report = pd.DataFrame(report).transpose()
+
         st.write(f'Classifier = {classifier_name}')
-        st.write(f'Accuracy =', acc)
+
+        st.write(df_report)
+
+        st.write(f'The {classifier_name} model accuracy on Test data is ', acc)
 
         # save the model to disk
         filename = 'classifier_models.pkl'
         pickle.dump(clf, open(filename, 'wb'))
 
-
-        #### PLOT DATASET ####
-        # Project the data onto the 2 primary principal components
+        # #### PLOT DATASET ####
+        # # Project the data onto the 2 primary principal components
         pca = PCA(2)
         X_projected = pca.fit_transform(X)
 
