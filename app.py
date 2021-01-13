@@ -1,26 +1,15 @@
 """Main module for the streamlit app"""
 import streamlit as st
-
 import awesome_streamlit as ast
-import src.pages.about
-import src.pages.gallery.index
 import src.pages.home
-import src.pages.vision
-import src.pages.xuLyData
-import src.pages.regressor_module
 import src.pages.classifier_module
-import src.pages.tienXuLyData
-import src.pages.modelPage
+
 import src.pages.predict
 
 # ast.core.services.other.set_logging_format()
 
 PAGES = {
     "Home": src.pages.home,
-    "Phân tích dữ liệu": src.pages.xuLyData,
-    "Tiền xử lý": src.pages.tienXuLyData,
-    "Mô hình": src.pages.modelPage,
-    "Hồi quy (Regression)": src.pages.regressor_module,
     "Phân lớp (Classifier)": src.pages.classifier_module,
     "Dự đoán": src.pages.predict
 }
