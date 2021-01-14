@@ -24,32 +24,37 @@ def write():
         return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
     if uploaded_file is not None and uploaded_model is not None:
-        df = pd.read_csv(uploaded_file, low_memory=False)
-        model = pickle.load(uploaded_model)
+        try:
+            df = pd.read_csv(uploaded_file, low_memory=False)
+            model = pickle.load(uploaded_model)
 
-        # Normalize
-        sc = StandardScaler()
-        x_test = sc.fit_transform(df)
+            # Normalize
+            sc = StandardScaler()
+            x_test = sc.fit_transform(df)
 
-        # load model
-        # clf = pickle.load(open('classifier_models.pkl', 'rb'))
+            # load model
+            # clf = pickle.load(open('classifier_models.pkl', 'rb'))
 
-        pred_clf = model.predict(x_test)
+            pred_clf = model.predict(x_test)
 
-        bad = []
-        good = []
-        for i in pred_clf:
-            if i == 0:
-                bad.append(i)
-            else:
-                good.append(i)
+            bad = []
+            good = []
+            for i in pred_clf:
+                if i == 0:
+                    bad.append(i)
+                else:
+                    good.append(i)
 
-        df['tasty'] = ['Bad' if x == 0 else 'Good' for x in pred_clf]
+            df['tasty'] = ['Bad' if x == 0 else 'Good' for x in pred_clf]
 
-        st.write('Đã đánh giá tự động xong !!!', df)
-        st.write('Bad: ', len(bad))
-        st.write('Good: ', len(good))
+            st.write('Đã đánh giá tự động xong !!!', df)
+            st.write('Bad: ', len(bad))
+            st.write('Good: ', len(good))
 
-        if st.button('Download Dataframe as CSV'):
-            tmp_download_link = download_link(df, 'predict.csv', 'Click here to download your data!')
-            st.markdown(tmp_download_link, unsafe_allow_html=True)
+            if st.button('Download Dataframe as CSV'):
+                tmp_download_link = download_link(df, 'predict.csv', 'Click here to download your data!')
+                st.markdown(tmp_download_link, unsafe_allow_html=True)
+        except ValueError:
+            st.write('Lỗi file !!')
+        except:
+            st.write('Phải là model !!!')

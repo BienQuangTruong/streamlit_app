@@ -16,7 +16,6 @@ def write():
 Web app này hỗ trợ **Đánh giá chất lượng từ tập dữ liệu rượu vang do người dùng nhập vào** theo thang chất lượng: 
 - 0 - Không ngon
 - 1 - Ngon
-
 ## Tầm quan trọng
 Trong vài thập kỷ qua, ngành công nghiệp rượu vang phát triển với nhiều chủng loại đa dạng.
     """

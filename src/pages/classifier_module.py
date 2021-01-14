@@ -27,119 +27,122 @@ def write():
     classifier_name = st.sidebar.selectbox("Select Classifier", ("KNN", "MLP Classifier", "SVM", "RandomForest"))
 
     if uploaded_file is not None:
-        # Can be used wherever a "file-like" object is accepted:
-        # uploaded_file.seek(0)
-        wine = pd.read_csv(uploaded_file, low_memory=False)
-    
-        #z-core
-        z = np.abs(stats.zscore(wine))
-
-        wine = wine[(z < 3).all(axis=1)]
-        wine['quality'] = [0 if x < 7 else 1 for x in wine['quality']]
+        try:
+            # Can be used wherever a "file-like" object is accepted:
+            # uploaded_file.seek(0)
+            wine = pd.read_csv(uploaded_file, low_memory=False)
         
-        st.write(wine)
+            #z-core
+            z = np.abs(stats.zscore(wine))
 
-        X = wine.drop(['quality'], axis = 1)
-        y = wine['quality']
+            wine = wine[(z < 3).all(axis=1)]
+            wine['quality'] = [0 if x < 7 else 1 for x in wine['quality']]
+            
+            st.write(wine)
 
-        #Normalize
-        X = StandardScaler().fit_transform(X)
+            X = wine.drop(['quality'], axis = 1)
+            y = wine['quality']
 
-        st.write("Shape of dataset", X.shape)
+            #Normalize
+            X = StandardScaler().fit_transform(X)
 
-        # strtifiedKFold
-        skf = StratifiedKFold(n_splits=5)
+            st.write("Shape of dataset", X.shape)
 
-        # Set up classifier
-        def get_classifier(clf_name):
-            if clf_name == 'SVM':
-                svc = SVC()
-                grid_params = {'C': [0.1, 0.3, 1, 3, 10], 'gamma': [0.1, 0.3, 1, 3, 10], 'kernel': ['rbf', 'sigmoid']}
-                svm_gs = GridSearchCV(estimator=svc, param_grid=grid_params, scoring='accuracy', cv=skf)
-                return svm_gs
-            elif clf_name == 'MLP Classifier':
-                mlp = MLPClassifier()
-                grid_params = {
-                    'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)],
-                    'activation': ['tanh', 'relu'],
-                    'solver': ['sgd', 'adam'],
-                    'alpha': [0.0001, 0.05],
-                    'learning_rate': ['constant','adaptive'],
-                }
-                # from sklearn.model_selection import GridSearchCV
-                mlp_gs = GridSearchCV(mlp, param_grid=grid_params, n_jobs=-1, cv=skf)
-                return mlp_gs
-            elif clf_name == 'RandomForest':
-                rfc = RandomForestClassifier(random_state=2018, oob_score=True)
-                grid_params = {"n_estimators": [50, 100, 150, 200, 250],
-                                'min_samples_leaf': [1, 2, 4]}
-                rfc_gs = GridSearchCV(rfc, param_grid=grid_params, scoring='accuracy', cv=skf)
-                
-                return rfc_gs
-            else:
-                knn = KNeighborsClassifier()
-                grid_params = { 'n_neighbors' : [5,7,9,11,13,15],
-                                'weights' : ['uniform','distance'],
-                                'metric' : ['minkowski','euclidean','manhattan']}
-                knn_gs = GridSearchCV(knn, param_grid=grid_params, scoring='accuracy', cv=skf)
-                return knn_gs
-            return
+            # strtifiedKFold
+            skf = StratifiedKFold(n_splits=5)
 
-        clf = get_classifier(classifier_name)
+            # Set up classifier
+            def get_classifier(clf_name):
+                if clf_name == 'SVM':
+                    svc = SVC()
+                    grid_params = {'C': [0.1, 0.3, 1, 3, 10], 'gamma': [0.1, 0.3, 1, 3, 10], 'kernel': ['rbf', 'sigmoid']}
+                    svm_gs = GridSearchCV(estimator=svc, param_grid=grid_params, scoring='accuracy', cv=skf)
+                    return svm_gs
+                elif clf_name == 'MLP Classifier':
+                    mlp = MLPClassifier()
+                    grid_params = {
+                        'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)],
+                        'activation': ['tanh', 'relu'],
+                        'solver': ['sgd', 'adam'],
+                        'alpha': [0.0001, 0.05],
+                        'learning_rate': ['constant','adaptive'],
+                    }
+                    # from sklearn.model_selection import GridSearchCV
+                    mlp_gs = GridSearchCV(mlp, param_grid=grid_params, n_jobs=-1, cv=skf)
+                    return mlp_gs
+                elif clf_name == 'RandomForest':
+                    rfc = RandomForestClassifier(random_state=2018, oob_score=True)
+                    grid_params = {"n_estimators": [50, 100, 150, 200, 250],
+                                    'min_samples_leaf': [1, 2, 4]}
+                    rfc_gs = GridSearchCV(rfc, param_grid=grid_params, scoring='accuracy', cv=skf)
+                    
+                    return rfc_gs
+                else:
+                    knn = KNeighborsClassifier()
+                    grid_params = { 'n_neighbors' : [5,7,9,11,13,15],
+                                    'weights' : ['uniform','distance'],
+                                    'metric' : ['minkowski','euclidean','manhattan']}
+                    knn_gs = GridSearchCV(knn, param_grid=grid_params, scoring='accuracy', cv=skf)
+                    return knn_gs
+                return
 
-        #### CLASSIFICATION ####
+            clf = get_classifier(classifier_name)
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+            #### CLASSIFICATION ####
 
-        clf.fit(X_train, y_train)
-        st.write(f'Classifier = {classifier_name}')
-        st.write('Best Score: ', clf.best_score_)
-        
-        st.write('Best Params: ', clf.best_params_)
-        y_pred = clf.predict(X_test)
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-        acc = accuracy_score(y_test, y_pred)
+            clf.fit(X_train, y_train)
+            st.write(f'Classifier = {classifier_name}')
+            st.write('Best Score: ', clf.best_score_)
+            
+            st.write('Best Params: ', clf.best_params_)
+            y_pred = clf.predict(X_test)
 
-        report = classification_report(y_test,y_pred, output_dict=True)
+            acc = accuracy_score(y_test, y_pred)
 
-        df_report = pd.DataFrame(report).transpose()
+            report = classification_report(y_test,y_pred, output_dict=True)
 
-        st.write(df_report)
+            df_report = pd.DataFrame(report).transpose()
 
-        st.write(f'The {classifier_name} model accuracy on Test data is ', acc)
+            st.write(df_report)
 
-        clf_confusion = confusion_matrix(y_test,  y_pred)
-        st.write("Confusion matrix: ", clf_confusion)
+            st.write(f'The {classifier_name} model accuracy on Test data is ', acc)
 
-        # if st.button('Save Model'):
-        #     # save the model to disk
-        #     filename = 'classifier_models.pkl'
-        #     pickle.dump(clf, open(filename, 'wb'))
-        #     st.write('Saved !!')
+            clf_confusion = confusion_matrix(y_test,  y_pred)
+            st.write("Confusion matrix: ", clf_confusion)
 
-        def download_model(model, download_filename, download_link_text):
-            output_model = pickle.dumps(model)
-            b64 = base64.b64encode(output_model).decode()
-            return f'<a href="data:file/output_model;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
+            # if st.button('Save Model'):
+            #     # save the model to disk
+            #     filename = 'classifier_models.pkl'
+            #     pickle.dump(clf, open(filename, 'wb'))
+            #     st.write('Saved !!')
 
-        if st.button('Download Trained Model'):
-            nameFile = ''+classifier_name+'.pkl'
-            tmp_download_link = download_model(clf, nameFile, 'Click here to download your model' )
-            st.markdown(tmp_download_link, unsafe_allow_html=True)
+            def download_model(model, download_filename, download_link_text):
+                output_model = pickle.dumps(model)
+                b64 = base64.b64encode(output_model).decode()
+                return f'<a href="data:file/output_model;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
-        # #### PLOT DATASET ####
-        # # Project the data onto the 2 primary principal components
-        pca = PCA(2)
-        X_projected = pca.fit_transform(X)
+            if st.button('Download Trained Model'):
+                nameFile = ''+classifier_name+'.pkl'
+                tmp_download_link = download_model(clf, nameFile, 'Click here to download your model' )
+                st.markdown(tmp_download_link, unsafe_allow_html=True)
 
-        x1 = X_projected[:, 0]
-        x2 = X_projected[:, 1]
+            # #### PLOT DATASET ####
+            # # Project the data onto the 2 primary principal components
+            pca = PCA(2)
+            X_projected = pca.fit_transform(X)
 
-        fig = plt.figure()
-        plt.scatter(x1, x2, c=y, alpha=0.8, cmap='viridis')
+            x1 = X_projected[:, 0]
+            x2 = X_projected[:, 1]
 
-        plt.xlabel('Principal Component 1')
-        plt.ylabel('Principal Component 2')
-        plt.colorbar()
+            fig = plt.figure()
+            plt.scatter(x1, x2, c=y, alpha=0.8, cmap='viridis')
 
-        st.pyplot(fig)
+            plt.xlabel('Principal Component 1')
+            plt.ylabel('Principal Component 2')
+            plt.colorbar()
+
+            st.pyplot(fig)
+        except:
+            st.write('Lỗi file !!')
