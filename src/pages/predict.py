@@ -1,17 +1,16 @@
 import pickle
 import base64
-from sklearn.svm import SVR
 import streamlit as st
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 def write():
 
     st.title(" DỰ ĐOÁN (PREDICT) ")
 
     ###########################################
+    uploaded_model = st.file_uploader("Chọn model từ máy của bạn")
     uploaded_file = st.file_uploader("Chọn tập dữ liệu CSV từ máy của bạn")
 
     def download_link(object_to_download, download_filename, download_link_text):
@@ -23,22 +22,36 @@ def write():
 
         return f'<a href="data:file/txt;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file, low_memory=False)
-        
-        # Normalize
-        sc = StandardScaler()
-        x_test = sc.fit_transform(df)
+    if st.button('Run predict'):
+        if uploaded_file is not None and uploaded_model is not None:
+            df = pd.read_csv(uploaded_file, low_memory=False)
+            model = pickle.load(uploaded_model)
+            
+            # Normalize
+            sc = StandardScaler()
+            x_test = sc.fit_transform(df)
 
-        #load model
-        clf = pickle.load(open('classifier_models.pkl', 'rb'))
+            #load model
+            # clf = pickle.load(open('classifier_models.pkl', 'rb'))
 
-        pred_clf = clf.predict(x_test)
+            pred_clf = model.predict(x_test)
 
-        df['quality'] = pred_clf
+            bad = []
+            good = []
+            for i in pred_clf:
+                if i == 0:
+                    bad.append(i)
+                else:
+                    good.append(i)
 
-        st.write('Đã dự đoán xong !!!', df)
+            df['tasty'] = ['Bad' if x == 0 else 'Good' for x in pred_clf]
 
-        if st.button('Download Dataframe as CSV'):
-            tmp_download_link = download_link(df, 'predict.csv', 'Click here to download your data!')
-            st.markdown(tmp_download_link, unsafe_allow_html=True)
+            st.write('Đã đánh giá tự động xong !!!', df)
+            st.write('Bad: ', len(bad))
+            st.write('Good: ', len(good))
+            
+
+
+            if st.button('Download Dataframe as CSV'):
+                tmp_download_link = download_link(df, 'predict.csv', 'Click here to download your data!')
+                st.markdown(tmp_download_link, unsafe_allow_html=True)
