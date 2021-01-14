@@ -10,7 +10,7 @@ import src.pages.predict
 
 PAGES = {
     "Home": src.pages.home,
-    "Phân lớp (Classifier)": src.pages.classifier_module,
+    "Đào tạo": src.pages.classifier_module,
     "Dự đoán": src.pages.predict
 }
 
