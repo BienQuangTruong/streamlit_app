@@ -34,8 +34,8 @@ def write():
         z = np.abs(stats.zscore(wine))
 
         wine = wine[(z < 3).all(axis=1)]
-        # wine['quality'] = [0 if x < 6 else 1 for x in wine['quality']]
-        wine['quality'] = [0 if x < 5 else 2 if x > 6 else 1 for x in wine['quality']]
+        wine['quality'] = [0 if x < 7 else 1 for x in wine['quality']]
+        # wine['quality'] = [0 if x < 5 else 2 if x > 6 else 1 for x in wine['quality']]
         
         st.write(wine)
 
@@ -44,7 +44,6 @@ def write():
 
         X = wine.drop(['quality'], axis = 1)
         y = wine['quality']
-        print(y)
 
         #Normalize
         X = StandardScaler().fit_transform(X)
@@ -63,12 +62,12 @@ def write():
         # Set up classifier
         def get_classifier(clf_name):
             if clf_name == 'SVM':
-                svc = SVC()
+                svc = SVC(random_state=1)
                 grid_params = {'C': [0.1, 0.3, 1, 3, 10], 'gamma': [0.1, 0.3, 1, 3, 10], 'kernel': ['rbf', 'sigmoid']}
                 svm_gs = GridSearchCV(estimator=svc, param_grid=grid_params, scoring='accuracy', cv=skf)
                 return svm_gs
             elif clf_name == 'MLP Classifier':
-                mlp = MLPClassifier()
+                mlp = MLPClassifier(random_state=1)
                 grid_params = {
                     'hidden_layer_sizes': [(50,50,50), (50,100,50), (100,)],
                     'activation': ['tanh', 'relu'],
@@ -80,7 +79,7 @@ def write():
                 mlp_gs = GridSearchCV(mlp, param_grid=grid_params, n_jobs=-1, cv=skf)
                 return mlp_gs
             elif clf_name == 'RandomForest':
-                rfc = RandomForestClassifier(oob_score=True)
+                rfc = RandomForestClassifier(random_state=1,oob_score=True)
                 grid_params = {"n_estimators": [50, 100, 150, 200, 250],
                                 'min_samples_leaf': [1, 2, 4]}
                 rfc_gs = GridSearchCV(rfc, param_grid=grid_params, scoring='accuracy', cv=skf)
@@ -100,13 +99,10 @@ def write():
 
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-        #Normalize
-        # sc = StandardScaler()
-
-        # X_train = sc.fit_transform(X_train)
-        # X_test = sc.fit_transform(X_test)
-
         clf.fit(X_train, y_train)
+        st.write('Best Score: ', clf.best_score_)
+        
+        st.write('Best Params: ', clf.best_params_)
         y_pred = clf.predict(X_test)
 
         acc = accuracy_score(y_test, y_pred)
@@ -121,9 +117,14 @@ def write():
 
         st.write(f'The {classifier_name} model accuracy on Test data is ', acc)
 
-        # save the model to disk
-        filename = 'classifier_models.pkl'
-        pickle.dump(clf, open(filename, 'wb'))
+        clf_confusion = confusion_matrix(y_test,  y_pred)
+        st.write("Confusion matrix: ", clf_confusion)
+
+        if st.button('Save Model'):
+            # save the model to disk
+            filename = 'classifier_models.pkl'
+            pickle.dump(clf, open(filename, 'wb'))
+            st.write('Saved !!')
 
         # #### PLOT DATASET ####
         # # Project the data onto the 2 primary principal components
