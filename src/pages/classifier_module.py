@@ -5,14 +5,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.decomposition import PCA
-from sklearn.svm import SVC, SVR
+from sklearn.svm import SVC
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
 from sklearn.neural_network import MLPClassifier
 import os
 from io import StringIO
-from sklearn.preprocessing import StandardScaler, LabelEncoder, MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 from scipy import stats
 from sklearn.model_selection import StratifiedKFold
 import pickle
@@ -36,30 +36,20 @@ def write():
 
         wine = wine[(z < 3).all(axis=1)]
         wine['quality'] = [0 if x < 7 else 1 for x in wine['quality']]
-        # wine['quality'] = [0 if x < 5 else 2 if x > 6 else 1 for x in wine['quality']]
         
         st.write(wine)
-
-        # y = wine['quality'].values
-        # X = wine.values[:, 0:-1]
 
         X = wine.drop(['quality'], axis = 1)
         y = wine['quality']
 
         #Normalize
         X = StandardScaler().fit_transform(X)
-        # dataset_name = {'data': (X), 'target': (y)}
-            
-        # def get_dataset(dataset_name):
-        #     data = dataset_name
-        #     X = data['data']
-        #     y = data['target']
-        #     return X, y
 
-        # X, y = get_dataset(dataset_name)
         st.write("Shape of dataset", X.shape)
+
         # strtifiedKFold
         skf = StratifiedKFold(n_splits=5)
+
         # Set up classifier
         def get_classifier(clf_name):
             if clf_name == 'SVM':
@@ -83,7 +73,6 @@ def write():
                 rfc = RandomForestClassifier(random_state=2018, oob_score=True)
                 grid_params = {"n_estimators": [50, 100, 150, 200, 250],
                                 'min_samples_leaf': [1, 2, 4]}
-                # grid_params = {"bootstrap":[True, False], "max_depth": list(range(2,10,1)), "min_samples_leaf": list(range(5,20,1))}
                 rfc_gs = GridSearchCV(rfc, param_grid=grid_params, scoring='accuracy', cv=skf)
                 
                 return rfc_gs
@@ -103,6 +92,7 @@ def write():
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
         clf.fit(X_train, y_train)
+        st.write(f'Classifier = {classifier_name}')
         st.write('Best Score: ', clf.best_score_)
         
         st.write('Best Params: ', clf.best_params_)
@@ -113,8 +103,6 @@ def write():
         report = classification_report(y_test,y_pred, output_dict=True)
 
         df_report = pd.DataFrame(report).transpose()
-
-        st.write(f'Classifier = {classifier_name}')
 
         st.write(df_report)
 
@@ -129,14 +117,14 @@ def write():
         #     pickle.dump(clf, open(filename, 'wb'))
         #     st.write('Saved !!')
 
-        def download_model(model):
+        def download_model(model, download_filename, download_link_text):
             output_model = pickle.dumps(model)
             b64 = base64.b64encode(output_model).decode()
-            href = f'<a href="data:file/output_model;base64,{b64}" download="myfile.pkl">Download Trained Model .pkl File</a>'
-            st.markdown(href, unsafe_allow_html=True)
+            return f'<a href="data:file/output_model;base64,{b64}" download="{download_filename}">{download_link_text}</a>'
 
         if st.button('Download Trained Model'):
-            tmp_download_link = download_model(clf, '')
+            nameFile = ''+classifier_name+'.pkl'
+            tmp_download_link = download_model(clf, nameFile, 'Click here to download your model' )
             st.markdown(tmp_download_link, unsafe_allow_html=True)
 
         # #### PLOT DATASET ####
