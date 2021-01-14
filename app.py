@@ -9,8 +9,8 @@ import src.pages.predict
 # ast.core.services.other.set_logging_format()
 
 PAGES = {
-    "Home": src.pages.home,
-    "Phân lớp (Classifier)": src.pages.classifier_module,
+    "Giới thiệu": src.pages.home,
+    "Huấn Luyện Mô Hình": src.pages.classifier_module,
     "Dự đoán": src.pages.predict
 }
 

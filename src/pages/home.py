@@ -14,9 +14,8 @@ def write():
 # Giới thiệu chung
 Đánh giá chất lượng rượu vang bằng **học máy** giúp con người nhận định chính xác về chất lượng sản phẩm làm ra, từ đó hạn chế những rủi ro trong sản xuất và tăng cao hiệu suất.
 Web app này hỗ trợ **Đánh giá chất lượng từ tập dữ liệu rượu vang do người dùng nhập vào** theo thang chất lượng: 
-- 0 - tệ, không ngon
-- 1 - khá, tạm chấp nhận
-- 2 - ngon
+- 0 - Không ngon
+- 1 - Ngon
 
 ## Tầm quan trọng
 Trong vài thập kỷ qua, ngành công nghiệp rượu vang phát triển với nhiều chủng loại đa dạng.
