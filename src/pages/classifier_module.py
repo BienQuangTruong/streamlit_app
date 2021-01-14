@@ -73,6 +73,7 @@ def write():
                 rfc = RandomForestClassifier(random_state=2018, oob_score=True)
                 grid_params = {"n_estimators": [50, 100, 150, 200, 250],
                                 'min_samples_leaf': [1, 2, 4]}
+                # grid_params = {"bootstrap":[True, False], "max_depth": list(range(2,10,1)), "min_samples_leaf": list(range(5,20,1))}
                 rfc_gs = GridSearchCV(rfc, param_grid=grid_params, scoring='accuracy', cv=skf)
                 
                 return rfc_gs
